@@ -5,3 +5,11 @@ Feature 1:-
 Feature 2:- 
 
 *Enhance Image Preprocessing*: The code currently scales the image's pixel values to a fixed range (-50 to 30 dB) and converts it to amplitude. Depending on your input images, you might want to experiment with different preprocessing techniques, such as contrast stretching or histogram equalization, to enhance the features in the spectrogram. 
+
+Feature 3:- 
+
+3. *Improve Griffin-Lim Reconstruction*: Griffin-Lim is a basic algorithm for inverting a magnitude spectrogram back into the time domain. You can explore more advanced methods like WaveGAN or MelGAN for higher-quality audio generation. These models have shown significant improvements over Griffin-Lim.
+
+Feature 4:- 
+
+4. *Parameter Tuning*: Fine-tune the parameters like `time` and `n_iter` based on the nature of your input images and the desired audio output. For example, you might need more iterations for complex images or longer audio clips.
