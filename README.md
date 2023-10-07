@@ -13,3 +13,10 @@ Feature 3:-
 Feature 4:- 
 
 4. *Parameter Tuning*: Fine-tune the parameters like `time` and `n_iter` based on the nature of your input images and the desired audio output. For example, you might need more iterations for complex images or longer audio clips.
+    The ideal value for n_iter (the number of iterations for the Griffin-Lim algorithm) can vary depending on the complexity of the image and the desired quality of the resulting audio. It's often an empirical value that you might need to experiment with based on the characteristics of your specific use case. 
+
+    Low Values (e.g., 10-30):  low iterations. fast processing. and low quality of audio generation. 
+
+    Medium Values (e.g., 30-50):  balance range to start with. Suitable for many cases. 
+
+    High Values (e.g., 50-100 or more):  high iterations, high quality of audio. escepillay used for highly complex images. 
