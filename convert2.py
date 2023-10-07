@@ -46,6 +46,6 @@ def main(time, n_fft, hop_length, n_iter, image, contrast_stretch, hist_equalize
 
 desc = "Upload an image you would like to hear. Fine-tune parameters like time and n_iter for desired audio output."
 
-interface = gr.Interface(fn=main, inputs=[time, n_fft, hop_length, n_iter, image, contrast_stretch, hist_equalize, improve_reconstruction], outputs="audio", title="Improved Image Sonification", description=desc)
+interface = gr.Interface(fn=main, inputs=[image,time, n_fft, hop_length, n_iter, contrast_stretch, hist_equalize, improve_reconstruction], outputs="audio", title="Improved Image Sonification", description=desc)
 
 interface.launch()
