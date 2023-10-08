@@ -1,4 +1,3 @@
-
 import streamlit as st
 import covert5  # Import the module where your main script logic resides
 from pywavefront import Wavefront
@@ -32,6 +31,14 @@ st.title("Sonification of Sounds")
 st.image("https://c4.wallpaperflare.com/wallpaper/349/372/16/abstract-space-nebula-space-art-wallpaper-preview.jpg", use_column_width=True)
 
 # Add a button to start the main script
-if st.button("Start Sonifying"):
+button_clicked = st.button("Start Sonifying")
+
+# Check if the button has been clicked
+if button_clicked:
     # Call the main script logic from the `covert5` module
     covert5.main()  # Replace `main()` with the actual function name from your `covert5` module
+
+# Alternatively, you can use st.cache to cache the function results
+covert5_cached = st.cache(covert5.main)
+if button_clicked:
+    covert5_cached()  # Replace `main()` with the actual function name from your `covert5` module
