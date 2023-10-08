@@ -3,5 +3,5 @@ numpy==1.25.2
 Pillow==10.0.1
 matplotlib==3.8.0
 scipy==1.11.3
-opencv-python==4.8.1.78
+opencv-python-headless==4.8.1.78
 soundfile==0.12.1
