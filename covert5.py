@@ -9,8 +9,9 @@ import os
 import soundfile as sf
 from pydub import AudioSegment
 from pywavefront import Wavefront
+import pywavefront
 
-def img_to_audio(image, time=3.0, rate=22050, n_fft=1024, n_iter=64, hop_length=512, contrast_stretch=False, hist_equalize=False, improve_reconstruction=False):
+def img_to_audio(image, time=3.0, rate=44100, n_fft=2048, n_iter=64, hop_length=512, contrast_stretch=False, hist_equalize=False, improve_reconstruction=False):
     # Load image
     img = Image.fromarray(image).convert("L")
 
@@ -23,7 +24,7 @@ def img_to_audio(image, time=3.0, rate=22050, n_fft=1024, n_iter=64, hop_length=
     # Calculate spectrogram size
     spec_shape = (int(librosa.time_to_frames(1.0, sr=rate, hop_length=hop_length, n_fft=n_fft) * time), n_fft)
     spec = np.asarray(img.resize(spec_shape))
-    spec = np.interp(spec, (spec.min(), spec.max()), (-50, 30))
+    spec = np.interp(spec, (spec.min(), spec.max()), (-30, 10))  # Adjust the range
     spec = librosa.db_to_amplitude(spec)
 
     if improve_reconstruction:
@@ -36,7 +37,7 @@ def img_to_audio(image, time=3.0, rate=22050, n_fft=1024, n_iter=64, hop_length=
     # Apply smoothing to make the audio more appealing
     audio = smooth_audio(audio)
 
-    return (rate, audio)
+    return rate, audio
 
 def smooth_audio(audio, sigma=1):
     # Apply Gaussian smoothing to the audio
@@ -89,37 +90,113 @@ def read_video_frames(uploaded_file, frame_skip=1):
 
     return frames
 
-def video_to_audio(video_frames, output_audio_path, time=3.0, rate=22050, n_fft=1024, n_iter=64, hop_length=512, contrast_stretch=False, hist_equalize=False, improve_reconstruction=False):
+def video_to_audio(video_frames, output_audio_path, time=3.0, rate=44100, n_fft=2048, n_iter=64, hop_length=512, contrast_stretch=False, hist_equalize=False, improve_reconstruction=False):
     audio_frames = []
-    for frame in video_frames:
+    video_frame_rate = len(video_frames) / time  # Calculate the frame rate of the video
+
+    for i, frame in enumerate(video_frames):
+        # Calculate the corresponding time for the audio segment
+        audio_time = i / video_frame_rate
+
+        # Ensure that we generate audio only within the specified time
+        if audio_time >= time:
+            break
+
         audio = img_to_audio(frame, time, rate, n_fft, n_iter, hop_length, contrast_stretch, hist_equalize, improve_reconstruction)
         audio_frames.append(audio[1])
+
     audio_frames = np.concatenate(audio_frames)
 
     # Save the resulting audio as a WAV file
     sf.write(output_audio_path, audio_frames, rate)
 
-# Define a function to sonify the 3D object
-def obj_to_audio(obj_file_path, time=3.0, rate=22050, n_fft=1024, n_iter=64, hop_length=512, contrast_stretch=False, hist_equalize=False, improve_reconstruction=False):
-    # Read and process the .obj file
-    obj = Wavefront(obj_file_path)
-    
-    # Extract vertex positions
-    vertices = obj.vertices
-    
-    # Prepare 3D data for sonification (you can customize this part)
-    # For example, you can map vertex positions to audio parameters
-    # For now, this is a placeholder that generates random audio
-    audio_data = np.random.randn(int(time * rate))
 
-    # Apply Gaussian smoothing to the audio
-    smoothed_audio = gaussian_filter(audio_data, sigma=1)
+def obj_to_audio(obj_file_path, time=3.0, rate=22050, sigma=1):
+    try:
+        # Read and process the .obj file
+        obj = Wavefront(obj_file_path)
+        # Define the range for mapping x-coordinate (min_x and max_x) to pitch (min_pitch and max_pitch)
+        min_x = min(vertices, key=lambda x: x[0])[0]  # Find the minimum x-coordinate in your vertices
+        max_x = max(vertices, key=lambda x: x[0])[0]  # Find the maximum x-coordinate in your vertices
+        min_pitch = 100  # Minimum pitch value
+        max_pitch = 1000  # Maximum pitch value
 
-    # Save the resulting audio as a WAV file
-    audio_path = "output_audio.wav"
-    sf.write(audio_path, smoothed_audio, rate)
+        # Define the range for mapping y-coordinate (min_y and max_y) to volume (min_volume and max_volume)
+        min_y = min(vertices, key=lambda x: x[1])[1]  # Find the minimum y-coordinate in your vertices
+        max_y = max(vertices, key=lambda x: x[1])[1]  # Find the maximum y-coordinate in your vertices
+        min_volume = -20  # Minimum volume in dB (e.g., -20 dB)
+        max_volume = 0  # Maximum volume in dB (e.g., 0 dB)
+        # Extract vertex positions
+        vertices = obj.vertices
 
-    return audio_path
+        audio_segments = []  # Store audio segments for each vertex
+
+        for vertex in vertices:
+            if len(vertex) != 3:
+                continue
+
+            x, y, z = vertex
+
+            # Map vertex positions to audio parameters (example: pitch and volume)
+            pitch = map_to_range(x, min_x, max_x, min_pitch, max_pitch)
+            volume = map_to_range(z, min_x, max_x, min_volume, max_volume)
+
+            # Create an audio segment for this vertex
+            vertex_audio = AudioSegment.silent(duration=int(time * 1000))  # Duration in milliseconds
+            vertex_audio = vertex_audio + AudioSegment.silent(duration=100)  # A small gap between vertex sounds
+            vertex_audio = vertex_audio + create_audio_from_parameters(time, rate, pitch, volume)
+
+            audio_segments.append(vertex_audio)
+
+        # Combine all audio segments into a single audio
+        audio = AudioSegment.silent(duration=0)
+        for segment in audio_segments:
+            audio += segment
+
+        # Apply Gaussian smoothing to the audio
+        audio = audio.low_pass_filter(sigma * 1000)  # Sigma in Hz
+
+        # Generate a unique output audio path
+        audio_path = f"output_audio_{int(time)}s.wav"
+        audio.export(audio_path, format="wav")
+
+        return audio_path
+
+    except Exception as e:
+        st.error(f"Error processing OBJ file: {str(e)}")
+        return None
+
+# Helper function to map values from one range to another
+def map_to_range(value, from_min, from_max, to_min, to_max):
+    return (value - from_min) / (from_max - from_min) * (to_max - to_min) + to_min
+
+def create_audio_from_parameters(time, rate, pitch, volume):
+    # Define audio properties
+    duration_ms = int(time * 1000)  # Duration in milliseconds
+    sample_rate = rate  # Sample rate in Hz
+    num_samples = int(duration_ms * sample_rate / 1000)
+
+    # Create time values for the audio
+    t = np.linspace(0, time, num_samples, endpoint=False)
+
+    # Generate audio waveform based on pitch and volume
+    frequency = 440.0 * 2**(pitch / 12.0)  # Calculate frequency from pitch (assuming A440 reference)
+    amplitude = 0.5 * volume  # Adjust volume
+
+    # Generate a simple sine wave as an example
+    audio_data = amplitude * np.sin(2 * np.pi * frequency * t)
+
+    # Convert the audio data to a PyDub AudioSegment
+    audio_segment = AudioSegment(
+        audio_data.tobytes(),  # Audio data as bytes
+        frame_rate=sample_rate,  # Sample rate
+        sample_width=audio_data.dtype.itemsize,  # Sample width in bytes
+        channels=1  # Mono audio
+    )
+
+    return audio_segment
+
+
 
 
 def main():
