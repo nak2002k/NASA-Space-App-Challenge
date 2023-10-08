@@ -265,7 +265,10 @@ def video_to_audio(video_frames, output_audio_path, time=3.0, rate=44100, n_fft=
 def main():
     st.title("Improved Image and Video Sonification")
 
-    st.warning("Please note that the sonification audio generation process may vary in duration based on your system specifications. Kindly await the completion of the generation process. Your patience is appreciated.")
+    st.warning("Sonification audio generation is in progress and may take time based on your system specifications. "
+            "Please be patient and wait until the generation is completed. If it's taking longer than expected, "
+            "you can explore examples of previously generated sonifications by [clicking here](https://drive.google.com/drive/u/1/folders/1RxxgECFDT4jRyEASmC2BYIDniamTrSCZ).")
+
 
 
     time = st.slider("Audio Time (seconds)", 1.0, 50.0, 3.0, 0.1)
