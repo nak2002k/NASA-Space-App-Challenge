@@ -36,6 +36,37 @@ def img_to_audio(image, time=3.0, rate=22050, n_fft=1024, n_iter=64, hop_length=
     # Apply more smoothing to make the audio more calm
     audio = smooth_audio(audio, sigma=2)
 
+    # Increase the amplitude to make the audio louder
+    audio = 1.5 * audio  # Adjust the multiplier as needed
+
+    return rate, audio
+
+    # Load image
+    img = Image.fromarray(image).convert("L")
+
+    # Apply preprocessing techniques
+    if contrast_stretch:
+        img = Image.fromarray(np.uint8(255 * (np.asarray(img) - np.min(img)) / (np.max(img) - np.min(img))))
+    if hist_equalize:
+        img = ImageOps.equalize(ImageOps.autocontrast(img)).convert("L")
+
+    # Calculate spectrogram size
+    spec_shape = (int(librosa.time_to_frames(1.0, sr=rate, hop_length=hop_length, n_fft=n_fft) * time), n_fft)
+    spec = np.asarray(img.resize(spec_shape))
+    spec = np.interp(spec, (spec.min(), spec.max()), (-30, 10))  # Adjust the range
+    spec = librosa.db_to_amplitude(spec)
+
+    if improve_reconstruction:
+        # Use advanced reconstruction method
+        reconstructed_spec = librosa.feature.inverse.mel_to_audio(spec)
+        audio = librosa.effects.preemphasis(reconstructed_spec)
+    else:
+        # Use Griffin-Lim for reconstruction with adjusted parameters
+        audio = librosa.griffinlim(spec, n_iter=n_iter * 2, hop_length=hop_length)
+
+    # Apply more smoothing to make the audio more calm
+    audio = smooth_audio(audio, sigma=2)
+
     # Adjust the amplitude to make the audio calmer
     audio = 0.3 * audio
 
