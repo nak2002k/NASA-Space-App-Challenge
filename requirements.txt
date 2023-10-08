@@ -1,0 +1,11 @@
+streamlit==0.84.0
+numpy==1.21.2
+librosa==0.8.1
+Pillow==8.2.0
+matplotlib==3.4.2
+scipy==1.7.2
+opencv-python-headless==4.5.3
+soundfile==0.10.3.post1
+pydub==0.25.1
+pywavefront==1.3.2
+scikit-image==0.18.3
