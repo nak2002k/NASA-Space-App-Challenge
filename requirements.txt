@@ -1,6 +1,6 @@
 librosa==0.10.1
 numpy==1.25.2
-PIL==10.0.1
+Pillow==10.0.1
 matplotlib==3.8.0
 scipy==1.11.3
 opencv-python==4.8.1.78
