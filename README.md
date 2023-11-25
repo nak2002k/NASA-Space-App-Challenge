@@ -1,22 +1,97 @@
-Feature 1:- 
+# 🎶 Improved Image, Video, and 3D Object Sonification 🖼️🎬🔊
 
-*Adjust Spectrogram Parameters*: You can fine-tune the spectrogram parameters for better results. The `n_fft` (number of FFT points) and `hop_length` (hop size) values can significantly affect the quality of the spectrogram and, consequently, the audio. Experiment with different values to find what works best for your images. 
+This Python script, integrated with the Streamlit framework, provides an interactive web application to transform visual data from images, videos, and 3D object files into mesmerizing audible soundscapes. The process, known as sonification, entails converting visual data into meaningful audio representations, providing a unique and immersive auditory experience. 🌐🔊
 
-Feature 2:- 
+## Prerequisites
 
-*Enhance Image Preprocessing*: The code currently scales the image's pixel values to a fixed range (-50 to 30 dB) and converts it to amplitude. Depending on your input images, you might want to experiment with different preprocessing techniques, such as contrast stretching or histogram equalization, to enhance the features in the spectrogram. 
+Before executing the script, ensure the presence of the following Python libraries:
 
-Feature 3:- 
+- `streamlit`
+- `numpy`
+- `librosa`
+- `PIL` (Pillow)
+- `matplotlib`
+- `scipy`
+- `opencv-python`
+- `soundfile`
+- `pydub`
+- `pywavefront`
 
-3. *Improve Griffin-Lim Reconstruction*: Griffin-Lim is a basic algorithm for inverting a magnitude spectrogram back into the time domain. You can explore more advanced methods like WaveGAN or MelGAN for higher-quality audio generation. These models have shown significant improvements over Griffin-Lim.
+Install these dependencies using the command:
 
-Feature 4:- 
+```bash
+pip install streamlit numpy librosa pillow matplotlib scipy opencv-python soundfile pydub pywavefront
+```
 
-4. *Parameter Tuning*: Fine-tune the parameters like `time` and `n_iter` based on the nature of your input images and the desired audio output. For example, you might need more iterations for complex images or longer audio clips.
-    The ideal value for n_iter (the number of iterations for the Griffin-Lim algorithm) can vary depending on the complexity of the image and the desired quality of the resulting audio. It's often an empirical value that you might need to experiment with based on the characteristics of your specific use case. 
+## How to Run
 
-    Low Values (e.g., 10-30):  low iterations. fast processing. and low quality of audio generation. 
+1. Clone the repository
+2. Change into the project directory:
+3. Install the dependencies and Run the script:
 
-    Medium Values (e.g., 30-50):  balance range to start with. Suitable for many cases. 
+   ```bash
+   streamlit run app.py
+   ```
 
-    High Values (e.g., 50-100 or more):  high iterations, high quality of audio. escepillay used for highly complex images. 
+4. Open the provided URL in your web browser to engage with the application.
+
+## Usage
+
+1. **Audio Time Slider:**
+   - Adjust the duration of the generated audio using the dedicated slider.
+
+2. **Spectrogram Parameters:**
+   - Fine-tune the parameters (`n_fft`, `hop_length`, `n_iter`) to control the spectrogram generation process.
+
+3. **Preprocessing Options:**
+   - Enable or disable preprocessing techniques (`Apply Contrast Stretching`, `Apply Histogram Equalization`, `Improve Griffin-Lim Reconstruction`) to tailor the transformation of input data.
+
+4. **File Uploader:**
+   - Upload images (JPEG, PNG), videos (MP4), or 3D object files (OBJ).
+
+5. **Frame Skip Slider:**
+   - If uploading a video, adjust the slider to skip frames during processing.
+
+6. **Generate Audio Button:**
+   - For images, click this button to convert the image to audio and visualize the waveform.
+   - For videos, the audio is generated from individual video frames, and the resulting audio file can be downloaded.
+   - For 3D objects, the script processes the object and plays the resulting audio.
+
+7. **Download Audio:**
+   - After audio generation, a button appears to download the audio file.
+
+8. **Play Audio:**
+   - Click the play button next to the 3D object sonification result to listen to the audio.
+
+## Methodology and Parameters
+
+The script employs various methods and parameters to enhance the sonification process:
+
+- **Contrast Stretching:**
+  - Applied through the checkbox `Apply Contrast Stretching`.
+  - Enhances the dynamic range of pixel values in the image, ensuring a more perceptually appealing audio representation.
+
+- **Histogram Equalization:**
+  - Enabled by selecting `Apply Histogram Equalization`.
+  - Improves the visibility of details in an image by redistributing pixel values across a broader range.
+
+- **Griffin-Lim Reconstruction:**
+  - Controlled by the checkbox `Improve Griffin-Lim Reconstruction`.
+  - Utilizes the Griffin-Lim algorithm for audio reconstruction, enhancing the fidelity of the generated audio from the spectrogram.
+
+- **Gaussian Smoothing:**
+  - Implemented through the `smooth_audio` function.
+  - Applies Gaussian smoothing to the audio, resulting in a more polished and aesthetically pleasing auditory experience.
+
+- **Waveform Generation:**
+  - Utilizes the `generate_waveform` function to plot and display the audio waveform.
+  - Offers a visual representation of the amplitude variations over time in the generated audio.
+
+These techniques, coupled with adjustable parameters such as spectrogram size, frame skip, and preprocessing options, empower users to tailor the sonification process to their specific preferences and achieve diverse and captivating audio outcomes. 🎨🔊
+
+Feel free to explore the potential of this application to transform visual stimuli into a rich and immersive auditory experience. 🚀🔊
+
+
+### Note:- 
+- This project was part of a 48hr non-stop hackathon so judge us accordingly 😅
+- All of the project implementation details are not added in the Readme here will add as early as possible
